@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Сердце из слова мама ❤️</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #050005;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#heart {
+    width: min(88vw, 65vh, 600px);
+    aspect-ratio: 1;
+    position: relative;
+    animation: pulse 2.7s ease-in-out infinite;
+}
+
+.word {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    color: #ff2998;
+    font-weight: 900;
+    font-size: clamp(13px, 3.2vw, 25px);
+    white-space: nowrap;
+    text-shadow: 0 0 8px #ff299855;
+}
+
+.word.big {
+    font-size: clamp(19px, 5vw, 38px);
+}
+
+@keyframes pulse {
+    0%, 100% { scale: 0.96; }
+    50%      { scale: 1.04; }
+}
+
+@media (max-width: 480px) {
+    #heart {
+        width: 94vw;
+    }
+
+    .word {
+        font-size: clamp(10px, 3.1vw, 17px);
+    }
+
+    .word.big {
+        font-size: clamp(15px, 4.6vw, 25px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #heart {
+        animation: none;
+    }
+}
+</style>
+</head>
+
+<body>
+<div id="heart" role="img" aria-label="Сердце из слов мама"></div>
+
+<script>
+const heart = document.getElementById("heart");
+const total = 100;
+
+for (let i = 0; i < total; i++) {
+    const t = 2 * Math.PI * i / total;
+
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = 13 * Math.cos(t)
+            - 5 * Math.cos(2 * t)
+            - 2 * Math.cos(3 * t)
+            - Math.cos(4 * t);
+
+    const word = document.createElement("span");
+
+    word.className = "word" + (i % 5 === 0 ? " big" : "");
+    word.textContent = "мама";
+
+    word.style.left = (50 + x * 2.5) + "%";
+    word.style.top = (48 - y * 2.5) + "%";
+    word.style.transform =
+        `translate(-50%, -50%) rotate(${-t}rad)`;
+
+    heart.appendChild(word);
+}
+</script>
+</body>
+</html>
