@@ -4,7 +4,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>Сердце для мамы ❤️</title>
 
 <style>
@@ -15,13 +14,11 @@
 html, body {
     margin: 0;
     width: 100%;
-    min-height: 100%;
+    height: 100%;
     background: #080008;
 }
 
 body {
-    min-height: 100vh;
-    min-height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -31,7 +28,7 @@ body {
 
 #heart {
     position: relative;
-    width: min(96vw, 70vh, 620px);
+    width: min(94vw, 65vh, 600px);
     aspect-ratio: 1;
     animation: pulse 2s ease-in-out infinite;
 }
@@ -40,39 +37,42 @@ body {
     position: absolute;
     transform: translate(-50%, -50%);
     color: #ff2998;
-    font-size: clamp(8px, 2vw, 12px);
-    font-weight: 700;
+    font-size: clamp(7px, 1.8vw, 11px);
+    font-weight: 500;
     line-height: 1;
     white-space: nowrap;
-    text-shadow: 0 0 4px #ff2998;
+    text-shadow: 0 0 2px #ff2998;
 }
 
-
 @keyframes pulse {
-    0%, 100% { transform: scale(0.97); }
-    50% { transform: scale(1.03); }
+    0%, 100% {
+        transform: scale(0.98);
+    }
+    50% {
+        transform: scale(1.02);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    #heart { animation: none; }
+    #heart {
+        animation: none;
+    }
 }
 </style>
 </head>
 
 <body>
-
-<div id="heart" aria-label="Контур сердца из слов мама"></div>
+<div id="heart"></div>
 
 <script>
 const heart = document.getElementById("heart");
+const total = 40;
+const points = [];
 
-// Параметры контура
-const total = 48;
+// Сначала создаём много точек по форме сердца
+for (let i = 0; i <= 2000; i++) {
+    const t = (2 * Math.PI * i) / 2000;
 
-for (let i = 0; i < total; i++) {
-    const t = (2 * Math.PI * i) / total;
-
-    // Математическая форма сердца
     const x = 16 * Math.pow(Math.sin(t), 3);
     const y =
         13 * Math.cos(t)
@@ -80,17 +80,43 @@ for (let i = 0; i < total; i++) {
         - 2 * Math.cos(3 * t)
         - Math.cos(4 * t);
 
+    points.push({
+        x: 50 + x * 2.65,
+        y: 48 - y * 2.65
+    });
+}
+
+// Измеряем длину контура
+const distances = [0];
+
+for (let i = 1; i < points.length; i++) {
+    const dx = points[i].x - points[i - 1].x;
+    const dy = points[i].y - points[i - 1].y;
+
+    distances.push(
+        distances[i - 1] + Math.sqrt(dx * dx + dy * dy)
+    );
+}
+
+const length = distances[distances.length - 1];
+
+// Расставляем слова равномерно по контуру
+for (let i = 0; i < total; i++) {
+    const target = (length * i) / total;
+
+    let index = distances.findIndex(d => d >= target);
+    if (index < 0) index = points.length - 1;
+
+    const point = points[index];
     const word = document.createElement("span");
+
     word.className = "word";
     word.textContent = "мама";
-
-    // Располагаем слова по контуру, не поворачивая их
-    word.style.left = (50 + x * 2.65) + "%";
-    word.style.top = (48 - y * 2.65) + "%";
+    word.style.left = point.x + "%";
+    word.style.top = point.y + "%";
 
     heart.appendChild(word);
 }
 </script>
-
 </body>
 </html>
