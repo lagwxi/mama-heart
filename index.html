@@ -28,23 +28,37 @@
 const canvas = document.getElementById('heart');
 const ctx = canvas.getContext('2d');
 
-const WORD = 'мама';
-const COLOR = '#ff2d55';
-const BG = '#000000';
-const NUM_WORDS = 140;          // сколько слов по контуру
-const FONT_RATIO = 0.018;       // размер шрифта = 1.8% от min(W,H)
-const HEART_SCALE = 1 / 3;      // сердце занимает 1/3 экрана
+// ===== Настройки =====
+const WORD        = 'мама';
+const COLOR       = '#ff2d55';
+const BG          = '#000000';
+const NUM_WORDS   = 90;          // ← меньше слов = больше расстояние между ними
+const FONT_RATIO  = 0.016;       // размер шрифта (доля от min(W,H))
+const HEART_SCALE = 1 / 3;       // сердце ~1/3 экрана
+const GLOW        = true;        // лёгкое свечение
+
+// Пульсация
+const PULSE_MIN   = 0.94;        // минимальный масштаб
+const PULSE_MAX   = 1.06;        // максимальный масштаб
+const PULSE_SPEED = 2.2;         // скорость «ударов» (рад/сек)
+
+let W = 0, H = 0, dpr = 1;
+let fontSize = 12;
+let baseScale = 1;
 
 function resize() {
-  const dpr = window.devicePixelRatio || 1;
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-  canvas.width = W * dpr;
+  dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+
+  canvas.width  = W * dpr;
   canvas.height = H * dpr;
-  canvas.style.width = W + 'px';
+  canvas.style.width  = W + 'px';
   canvas.style.height = H + 'px';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  draw(W, H);
+
+  fontSize  = Math.max(10, Math.min(W, H) * FONT_RATIO);
+  baseScale = (Math.min(W, H) * HEART_SCALE) / 32;
 }
 
 // Параметрическое уравнение сердца
@@ -57,37 +71,56 @@ function heartPoint(t) {
   return [x, y];
 }
 
-function draw(W, H) {
+// Предрасчёт позиций слов (единичные координаты сердца)
+const points = [];
+for (let i = 0; i < NUM_WORDS; i++) {
+  const t = (2 * Math.PI * i) / NUM_WORDS;
+  points.push(heartPoint(t));
+}
+
+function drawFrame(time) {
+  // t в секундах
+  const pulse = (Math.sin(time * PULSE_SPEED) + 1) / 2;   // 0..1
+  const pulseScale = PULSE_MIN + (PULSE_MAX - PULSE_MIN) * pulse;
+
   ctx.fillStyle = BG;
   ctx.fillRect(0, 0, W, H);
 
-  const fontSize = Math.max(10, Math.min(W, H) * FONT_RATIO);
   ctx.font = `bold ${fontSize}px -apple-system, Helvetica, Arial, sans-serif`;
-  ctx.fillStyle = COLOR;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  // Масштаб: сердце ~1/3 меньшей стороны экрана
-  const base = Math.min(W, H) * HEART_SCALE;
-  const scale = base / 32;   // 32 — примерно ширина сердца в единицах формулы
+  if (GLOW) {
+    ctx.shadowColor = COLOR;
+    ctx.shadowBlur  = fontSize * 0.9 * pulseScale;
+  } else {
+    ctx.shadowBlur = 0;
+  }
+  ctx.fillStyle = COLOR;
+
   const cx = W / 2;
   const cy = H / 2;
+  const s  = baseScale * pulseScale;
 
-  for (let i = 0; i < NUM_WORDS; i++) {
-    const t = (2 * Math.PI * i) / NUM_WORDS;
-    const [x, y] = heartPoint(t);
-    const px = cx + x * scale;
-    const py = cy - y * scale;   // ось Y в canvas вниз
-    ctx.fillText(WORD, px, py);
+  for (let i = 0; i < points.length; i++) {
+    const [x, y] = points[i];
+    ctx.fillText(WORD, cx + x * s, cy - y * s);
   }
 }
 
-window.addEventListener('resize', resize);
+let start = null;
+function loop(ts) {
+  if (start === null) start = ts;
+  const time = (ts - start) / 1000;
+  drawFrame(time);
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', () => { resize(); });
 window.addEventListener('orientationchange', () => setTimeout(resize, 200));
-// Закрытие/перезапуск по тапу (на iOS Safari просто ничего, но приятно)
-canvas.addEventListener('click', () => { resize(); });
 
 resize();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
