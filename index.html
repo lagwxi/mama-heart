@@ -81,38 +81,44 @@
         const heart = document.getElementById("heart");
 
         
-        const stepX = 0.36;
-        const stepY = 0.30;
+        
+const rows = 31;
+const cols = 31;
 
+for (let row = 0; row < rows; row++) {
+    const y = 1.15 - row * (2.3 / (rows - 1));
 
-        for (let y = 1.1; y >= -1.1; y -= stepY) {
-            for (let x = -1.2; x <= 1.2; x += stepX) {
+    for (let col = 0; col < cols; col++) {
+        const x = -1.25 + col * (2.5 / (cols - 1));
 
-                // Проверяем, находится ли точка внутри сердца
-                const shape =
-                    Math.pow(x * x + y * y - 1, 3)
-                    - x * x * y * y * y;
+        const shape =
+            Math.pow(x * x + y * y - 1, 3)
+            - x * x * y * y * y;
 
-                if (shape <= 0) {
+        if (shape <= 0) {
+            // Оставляем только точки по контуру сердца
+            const innerX = x + 0.25;
+            const innerY = y;
 
-                    const word = document.createElement("span");
+            const innerShape =
+                Math.pow(innerX * innerX + innerY * innerY - 0.72, 3)
+                - innerX * innerX * innerY * innerY * innerY;
 
-                    word.className = "word";
+            if (shape > -0.15 || innerShape > 0) {
+                const word = document.createElement("span");
 
-                    if (Math.random() < 0.12) {
-                        word.classList.add("big");
-                    }
+                word.className = "word";
+                word.textContent = "мама";
 
-                    word.textContent = "мама";
+                word.style.left = ((x + 1.3) / 2.6 * 100) + "%";
+                word.style.top = ((1.2 - y) / 2.4 * 100) + "%";
 
-                    // Все слова остаются горизонтальными
-                    word.style.left = ((x + 1.3) / 2.6 * 100) + "%";
-                    word.style.top = ((1.2 - y) / 2.4 * 100) + "%";
-
-                    heart.appendChild(word);
-                }
+                heart.appendChild(word);
             }
         }
+    }
+}
+
     </script>
 
 </body>
