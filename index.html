@@ -40,12 +40,13 @@ body {
     position: absolute;
     transform: translate(-50%, -50%);
     color: #ff2998;
-    font-size: clamp(10px, 2.8vw, 17px);
-    font-weight: 900;
+    font-size: clamp(8px, 2vw, 12px);
+    font-weight: 700;
     line-height: 1;
     white-space: nowrap;
-    text-shadow: 0 0 7px #ff2998;
+    text-shadow: 0 0 4px #ff2998;
 }
+
 
 @keyframes pulse {
     0%, 100% { transform: scale(0.97); }
@@ -66,7 +67,7 @@ body {
 const heart = document.getElementById("heart");
 
 // Параметры контура
-const total = 54;
+const total = 48;
 
 for (let i = 0; i < total; i++) {
     const t = (2 * Math.PI * i) / total;
